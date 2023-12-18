@@ -6,6 +6,7 @@ from flask_gravatar import Gravatar
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
+import os
 
 from sqlalchemy import Integer, ForeignKey
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -14,7 +15,7 @@ from sqlalchemy.orm import relationship, mapped_column
 from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
+app.config['SECRET_KEY'] = os.environ.get('FLASK_KEY')
 ckeditor = CKEditor(app)
 Bootstrap5(app)
 
@@ -29,7 +30,15 @@ def load_user(user_id):
 
 
 # CONNECT TO DB
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///posts.db'
+# print("All Environment Variables:", os.environ)
+# print("DB_URI Value:", os.environ.get('DB_URI'))
+#
+# print("Current Working Directory:", os.getcwd())
+# print("DB_URI from os.environ:", os.environ.get('DB_URI'))
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///posts.db'
+
+
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_URI')
 db = SQLAlchemy()
 db.init_app(app)
 
@@ -84,7 +93,6 @@ class Comment(db.Model):
 
     post_id = db.Column(db.Integer, db.ForeignKey("blog_posts.id"))
     post = db.relationship("BlogPost", back_populates="comments")
-
 
 
 with app.app_context():
@@ -252,4 +260,4 @@ def contact():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5002)
+    app.run(debug=False, port=5002)
